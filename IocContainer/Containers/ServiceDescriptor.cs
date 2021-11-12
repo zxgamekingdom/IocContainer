@@ -5,7 +5,7 @@ namespace IocContainer.Containers
     /// <summary>
     /// 服务描述文件
     /// </summary>
-    public class ServiceDescriptor
+    public record ServiceDescriptor
     {
         /// <summary>
         /// 服务类型
@@ -33,40 +33,51 @@ namespace IocContainer.Containers
         public ServiceLifetime Lifetime { get; internal set; }
     }
 
-
-
     /// <summary>
     /// 服务描述文件
     /// </summary>
-    public class ServiceDescriptor<TService, TImplementation> where TImplementation : TService
+    public record ServiceDescriptor<TService, TImplementation>
+        where TImplementation : TService
     {
         /// <summary>
         /// 初始化 生命周期,键
         /// </summary>
         /// <param name="ifetime"></param>
         /// <param name="serviceKey"></param>
-        public ServiceDescriptor(ServiceLifetime ifetime = ServiceLifetime.Transient, object? serviceKey = null)
+        public ServiceDescriptor(ServiceLifetime ifetime = ServiceLifetime.Transient,
+            object? serviceKey = null)
         {
             Lifetime = ifetime;
             ServiceKey = serviceKey;
         }
+
         /// <summary>
         /// 初始化实现工厂
         /// </summary>
         /// <param name="implementationFactory"></param>
         /// <param name="lifeTime"></param>
         /// <param name="serviceKey"></param>
-        public ServiceDescriptor(Func<Container, TImplementation> implementationFactory, ServiceLifetime lifeTime = ServiceLifetime.Transient, object? serviceKey = null) : this(lifeTime, serviceKey)
+        public ServiceDescriptor(Func<Container, TImplementation> implementationFactory,
+            ServiceLifetime lifeTime = ServiceLifetime.Transient,
+            object? serviceKey = null) : this(lifeTime, serviceKey)
         {
             ImplementationFactory = implementationFactory;
         }
+
         /// <summary>
         /// 初始化实现实例
         /// </summary>
-        /// <param name="implementationInstance"></param>
-        /// <param name="serviceKey"></param>
-        public ServiceDescriptor(TImplementation implementationInstance, object? serviceKey = null) : this(ServiceLifetime.Singleton, serviceKey)
+        public ServiceDescriptor(TImplementation implementationInstance,
+            ServiceLifetime lifetime = ServiceLifetime.Singleton,
+            object? serviceKey = null) : this(lifetime, serviceKey)
         {
+            //检查生命周期是不是单例或者局部
+            if (lifetime != ServiceLifetime.Singleton &&
+                lifetime != ServiceLifetime.Scoped)
+            {
+                throw new ArgumentException("实现实例必须是单例实例或作用域实例");
+            }
+
             ImplementationInstance = implementationInstance;
         }
 
@@ -85,7 +96,11 @@ namespace IocContainer.Containers
         /// <summary>
         /// 实现工厂
         /// </summary>
-        public Func<Container, TImplementation>? ImplementationFactory { get; internal set; }
+        public Func<Container, TImplementation>? ImplementationFactory
+        {
+            get;
+            internal set;
+        }
         /// <summary>
         /// 键
         /// </summary>
