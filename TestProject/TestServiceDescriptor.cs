@@ -2,20 +2,15 @@
 
 using System;
 using IocContainer.Containers;
+using TestProject.测试数据;
 using Xunit;
 
 namespace TestProject
 {
+   
+
     public class TestServiceDescriptor
     {
-        public interface IA
-        {
-        }
-
-        public class A : IA
-        {
-        };
-
         [Fact]
         public void Test_Default()
         {

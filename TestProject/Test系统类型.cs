@@ -1,3 +1,4 @@
+using TestProject.测试数据;
 using Xunit;
 
 namespace TestProject
@@ -14,8 +15,13 @@ namespace TestProject
         public void Test_值元组()
         {
             var o = new object();
-            var type = typeof(TestServiceDescriptor.A);
-            Assert.Equal((o, type), (o, typeof(TestServiceDescriptor.A)));
+            var type = typeof(A);
+            Assert.Equal((o, type), (o, typeof(A)));
+        }
+
+        [Fact]
+        public void Test_TestType()
+        {
         }
     }
 }
