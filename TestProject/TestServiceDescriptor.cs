@@ -16,7 +16,7 @@ namespace TestProject
         {
             {
                 var descriptor = new ServiceDescriptor<IA, A>();
-                ServiceDescriptor serviceDescriptor = descriptor.ToServiceDescriptor();
+                ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
                 Assert.Equal(descriptor.Lifetime, serviceDescriptor.Lifetime);
                 Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
                 Assert.Equal(descriptor.ImplementationType,
@@ -27,7 +27,7 @@ namespace TestProject
             }
             {
                 var descriptor = new ServiceDescriptor<IA, A>(serviceKey: "123");
-                ServiceDescriptor serviceDescriptor = descriptor.ToServiceDescriptor();
+                ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
                 Assert.Equal(descriptor.Lifetime, serviceDescriptor.Lifetime);
                 Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
                 Assert.Equal(descriptor.ImplementationType,
@@ -43,7 +43,7 @@ namespace TestProject
         public void Test_ImplementationInstance()
         {
             var descriptor = new ServiceDescriptor<IA, A>(new A());
-            ServiceDescriptor serviceDescriptor = descriptor.ToServiceDescriptor();
+            ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
             Assert.Equal(descriptor.Lifetime, serviceDescriptor.Lifetime);
             Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
             Assert.Equal(descriptor.ImplementationType,
@@ -59,7 +59,7 @@ namespace TestProject
         public void Test_ImplementationFactory()
         {
             var descriptor = new ServiceDescriptor<IA, A>((c) => new A());
-            ServiceDescriptor serviceDescriptor = descriptor.ToServiceDescriptor();
+            ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
             Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
             Assert.Equal(descriptor.ImplementationType,
                 serviceDescriptor.ImplementationType);

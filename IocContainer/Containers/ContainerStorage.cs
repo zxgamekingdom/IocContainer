@@ -28,10 +28,9 @@ namespace IocContainer.Containers
             var serviceType = serviceDescriptor.ServiceType;
             var key = serviceDescriptor.ServiceKey;
 
-            if (ServiceDescriptors.TryGetValue(serviceType,
-                out Dictionary<object, ServiceDescriptor> value))
+            if (ServiceDescriptors.TryGetValue(serviceType, out var value))
             {
-                if (value.TryGetValue(key, out ServiceDescriptor value1))
+                if (value.TryGetValue(key, out var value1))
                 {
                     当移除ServiceDescriptor时(value1);
                     value.Remove(key);
@@ -49,9 +48,20 @@ namespace IocContainer.Containers
             }
         }
 
-        private void 当移除ServiceDescriptor时(ServiceDescriptor serviceDescriptor)
+        private void 当移除ServiceDescriptor时(ServiceDescriptor? serviceDescriptor)
         {
             //TODO 当移除ServiceDescriptor时
+        }
+
+        public ServiceDescriptor? FindServiceDescriptor(Type serviceType, object rawKey)
+        {
+            if (ServiceDescriptors.TryGetValue(serviceType, out var value) &&
+                value.TryGetValue(rawKey, out var descriptor))
+            {
+                return descriptor!;
+            }
+
+            return default;
         }
     }
 }

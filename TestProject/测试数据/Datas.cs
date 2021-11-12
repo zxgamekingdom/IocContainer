@@ -2,6 +2,10 @@
 
 namespace TestProject.测试数据
 {
+    public abstract class AbsA
+    {
+    }
+
     public interface IA
     {
     }

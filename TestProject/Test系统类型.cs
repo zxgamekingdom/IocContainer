@@ -18,10 +18,5 @@ namespace TestProject
             var type = typeof(A);
             Assert.Equal((o, type), (o, typeof(A)));
         }
-
-        [Fact]
-        public void Test_TestType()
-        {
-        }
     }
 }
