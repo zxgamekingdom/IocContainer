@@ -7,9 +7,7 @@ using Xunit;
 
 namespace TestProject
 {
-   
-
-    public class TestServiceDescriptor
+    public class TestServiceDescriptor转换
     {
         [Fact]
         public void Test_Default()
@@ -58,7 +56,7 @@ namespace TestProject
         [Fact]
         public void Test_ImplementationFactory()
         {
-            var descriptor = new ServiceDescriptor<IA, A>((c) => new A());
+            var descriptor = new ServiceDescriptor<IA, A>(_ => new A());
             ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
             Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
             Assert.Equal(descriptor.ImplementationType,

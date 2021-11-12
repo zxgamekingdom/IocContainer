@@ -9,6 +9,13 @@ namespace IocContainer.Containers
             return (T) container.GetService(typeof(T), key);
         }
 
+        public static void AddService<TService>(this Container container,
+            ServiceLifetime lifetime = ServiceLifetime.Transient,
+            object? serviceKey = default)
+        {
+            AddService<TService, TService>(container, lifetime, serviceKey);
+        }
+
         public static void AddService<TService, TImplementation>(
             this Container container,
             ServiceLifetime lifetime = ServiceLifetime.Transient,
@@ -16,6 +23,17 @@ namespace IocContainer.Containers
         {
             container.AddService(
                 new ServiceDescriptor<TService, TImplementation>(lifetime, serviceKey));
+        }
+
+        public static void AddService<TService>(this Container container,
+            Func<Container, TService> implementationFactory,
+            ServiceLifetime lifeTime = ServiceLifetime.Transient,
+            object? serviceKey = null)
+        {
+            AddService<TService, TService>(container,
+                implementationFactory,
+                lifeTime,
+                serviceKey);
         }
 
         public static void AddService<TService, TImplementation>(
@@ -28,6 +46,17 @@ namespace IocContainer.Containers
                 new ServiceDescriptor<TService, TImplementation>(implementationFactory,
                     lifeTime,
                     serviceKey));
+        }
+
+        public static void AddService<TService>(this Container container,
+            TService implementationInstance,
+            ServiceLifetime lifetime = ServiceLifetime.Scoped,
+            object? serviceKey = null)
+        {
+            AddService<TService, TService>(container,
+                implementationInstance,
+                lifetime,
+                serviceKey);
         }
 
         public static void AddService<TService, TImplementation>(

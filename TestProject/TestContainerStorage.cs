@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using IocContainer.Containers;
 using TestProject.测试数据;
@@ -7,6 +8,35 @@ namespace TestProject
 {
     public class TestContainerStorage
     {
+        [Fact]
+        public void Test_添加可以处理的特殊服务()
+        {
+            var container = new Container();
+            Assert.ThrowsAny<ArgumentException>(() => { container.AddService<int>(); });
+            Assert.ThrowsAny<ArgumentException>(() =>
+            {
+                container.AddService<string>();
+            });
+            Assert.Null(TryException(() => container.AddService<A>()));
+            Assert.NotNull(TryException(() => container.AddService<double>()));
+        }
+
+        private static Exception? TryException(Action action)
+        {
+            Exception? ex = null;
+
+            try
+            {
+                action.Invoke();
+            }
+            catch (Exception? e)
+            {
+                ex = e;
+            }
+
+            return ex;
+        }
+
         [Fact]
         public void Test_重复添加服务()
         {

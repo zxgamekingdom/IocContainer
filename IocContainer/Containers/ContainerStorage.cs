@@ -47,6 +47,18 @@ namespace IocContainer.Containers
             where TImplementation : TService
         {
             var serviceDescriptor = descriptor.ToServiceDescriptor();
+
+            if (descriptor.ServiceType.是不是可以处理特殊类型() ||
+                descriptor.ImplementationType.是不是可以处理特殊类型())
+            {
+                if (descriptor.ImplementationFactory == null &&
+                    descriptor.ImplementationInstance == null)
+                {
+                    throw new ArgumentException($@"{serviceDescriptor
+                    }是一个特殊的类型,必须指定实现实例或者实现工厂");
+                }
+            }
+
             AddService(serviceDescriptor);
         }
 
@@ -75,8 +87,8 @@ namespace IocContainer.Containers
             ContainerInstanceBuildInfo buildInfo)
         {
             if (ServiceDescriptors.TryGetValue(descriptor.ServiceType,
-                    out Dictionary<object, ServiceDescriptor> value) &&
-                value.TryGetValue(descriptor.ServiceKey, out _))
+                    out var value) &&
+                value!.TryGetValue(descriptor.ServiceKey, out _))
             {
                 if (BuildInfos.ContainsKey(descriptor))
                 {
