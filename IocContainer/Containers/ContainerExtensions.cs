@@ -4,6 +4,11 @@ namespace IocContainer.Containers
 {
     public static class ContainerExtensions
     {
+        public static T GetService<T>(this Container container, object? key = null)
+        {
+            return (T) container.GetService(typeof(T), key);
+        }
+
         public static void AddService<TService, TImplementation>(
             this Container container,
             ServiceLifetime lifetime = ServiceLifetime.Transient,

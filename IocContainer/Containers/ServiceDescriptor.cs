@@ -31,6 +31,12 @@ namespace IocContainer.Containers
         /// 生命周期
         /// </summary>
         public ServiceLifetime Lifetime { get; internal set; }
+
+        public override string ToString()
+        {
+            return
+                $"{nameof(ServiceType)}: {ServiceType}, {nameof(ImplementationType)}: {ImplementationType}, {nameof(Lifetime)}: {Lifetime}, {nameof(ServiceKey)}: {ServiceKey}, {nameof(ImplementationInstance)}: {ImplementationInstance}, {nameof(ImplementationFactory)}: {ImplementationFactory}";
+        }
     }
 
     /// <summary>

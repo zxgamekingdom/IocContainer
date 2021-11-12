@@ -18,7 +18,6 @@ namespace IocContainer.Containers
             return type.IsDelegate() ||
                 type.IsDecimal() ||
                 type.IsNullable() ||
-                type.IsValueTuple() ||
                 type.IsBigInteger() ||
                 type.IsEnum ||
                 type.IsPrimitive ||
