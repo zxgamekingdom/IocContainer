@@ -21,7 +21,7 @@ namespace IocContainer.Containers
 
             if (!buildInfo.IsInitialized)
             {
-                buildInfo.PrecompileFactory.Invoke();
+                buildInfo.Precompile();
             }
 
             if (buildInfo.IsInitialized is false)
@@ -100,27 +100,27 @@ namespace IocContainer.Containers
         private void 为特殊类型创建BuildInfo(ServiceDescriptor descriptor)
         {
             var buildInfo = new ContainerInstanceBuildInfo(descriptor);
-            buildInfo.PrecompileFactory = () =>
+            buildInfo.SetPrecompileFactory(info =>
             {
-                var serviceType = buildInfo.ServiceDescriptor.ServiceType;
-                var implementationType = buildInfo.ServiceDescriptor.ImplementationType;
+                var serviceType = info.ServiceDescriptor.ServiceType;
+                var implementationType = info.ServiceDescriptor.ImplementationType;
                 ParameterExpression value = Variable(serviceType);
                 var assign = Assign(value, Default(implementationType));
-                var (@return, end) = CreateExpressionEnd(value);
+                var (@return, end) = CreateEndExpression(value);
                 var block = Block(new[] {value,}, assign, @return, end);
                 Expression<Func<object>> expression = Lambda<Func<object>>(block);
                 var compile = expression.Compile();
-                buildInfo.Variable = value;
-                buildInfo.Expression = expression;
-                buildInfo.KeyExpressions = new Expression[] {assign};
-                buildInfo.IsInitialized = true;
-                buildInfo.BuildFunc = compile;
-            };
+                info.Variable = value;
+                info.Expression = expression;
+                info.KeyExpressions = new Expression[] {assign};
+                info.BuildFunc = compile;
+                info.IsInitialized = true;
+            });
             Storage.AddBuildInfo(descriptor, buildInfo);
         }
 
         private static (GotoExpression @return, LabelExpression end)
-            CreateExpressionEnd(Expression value)
+            CreateEndExpression(Expression value)
         {
             var endLabel = Label(typeof(object));
             var end = Label(endLabel, Constant(null));
