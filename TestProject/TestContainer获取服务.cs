@@ -20,10 +20,28 @@ namespace TestProject
         [Fact]
         public void Test_指定实现工厂()
         {
-            // var container = new Container();
-            // container.AddService<IA, A>(_ => new A());
-            // var service = container.GetService(typeof(A));
-            // Assert.IsType<A>(service);
+            {
+                var container = new Container();
+                container.AddService<IA, A>(_ => new A());
+                var service = container.GetService(typeof(IA));
+                Assert.IsType<A>(service);
+            }
+            {
+                var container = new Container();
+                container.AddService<IA, A>(_ => new A(), ServiceLifetime.Singleton);
+                var service = container.GetService(typeof(IA));
+                var service1 = container.GetService(typeof(IA));
+                Assert.IsType<A>(service);
+                Assert.Equal(service1, service);
+            }
+            {
+                var container = new Container();
+                container.AddService<IA, A>(_ => new A(), ServiceLifetime.Scoped);
+                var service = container.GetService(typeof(IA));
+                var service1 = container.GetService(typeof(IA));
+                Assert.IsType<A>(service);
+                Assert.Equal(service1, service);
+            }
         }
 
         [Fact]
