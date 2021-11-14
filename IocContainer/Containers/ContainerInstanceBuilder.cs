@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
+using IocExpression = System.Linq.Expressions.Expression<System.Func<object>>;
 
 namespace IocContainer.Containers
 {
@@ -43,7 +45,82 @@ namespace IocContainer.Containers
         private ContainerInstanceBuildInfo 创建BuildInfo(
             ServiceDescriptor serviceDescriptor)
         {
+            ContainerInstanceBuildInfo? buildInfo = null;
+
+            if (serviceDescriptor.IscanHandlSpecialType)
+            {
+                buildInfo = 创建特殊类型的BuildInfo(serviceDescriptor);
+                goto  END;
+
+            }
+
+            if (serviceDescriptor.ImplementationInstance != null)
+            {
+                buildInfo = 创建ImplementationInstance不为null的BuildInfo(serviceDescriptor);
+                goto END;
+            }
+
+            END:
+            if (buildInfo != null)
+            {
+                Storage.AddBuildInfo(serviceDescriptor, buildInfo);
+                return buildInfo;
+            }
+
             throw new NotImplementedException();
+        }
+
+        private ContainerInstanceBuildInfo 创建ImplementationInstance不为null的BuildInfo(
+            ServiceDescriptor serviceDescriptor)
+        {
+            //生命周期必须为Singleton或者Scoped
+            if (serviceDescriptor.Lifetime != ServiceLifetime.Singleton &&
+                serviceDescriptor.Lifetime != ServiceLifetime.Scoped)
+            {
+                throw new InvalidOperationException($@"{serviceDescriptor
+                }的生命周期必须为Singleton或者Scoped");
+            }
+
+            var buildInfo = new ContainerInstanceBuildInfo(serviceDescriptor, Storage);
+            buildInfo.SetPrecompileFactory(info =>
+            {
+                var descriptor = info.ServiceDescriptor;
+                var value = Variable(descriptor.ServiceType);
+                var buff = Variable(typeof(object));
+                Expression<Func<ContainerStorage, object?>> findFromCache =
+                    storage => storage.FindInstanceFromCache(descriptor);
+                Expression<Action<ContainerStorage, ServiceDescriptor, object>>
+                    addToCache = (storage, descriptor1, instance) =>
+                        storage.AddInstanceToCache(descriptor1, instance);
+                var assignBuff = Assign(buff,
+                    Invoke(findFromCache, Constant(info.Storage)));
+                var ifThen = IfThen(Equal(buff, Constant(null)),
+                    Block(Assign(buff,
+                            Constant(info.ServiceDescriptor.ImplementationInstance)),
+                        Invoke(addToCache,
+                            Constant(info.Storage),
+                            Constant(descriptor),
+                            buff)));
+                var assignValue = Assign(value, Convert(buff, value.Type));
+                var (@return, end) = CreateEndExpression(value);
+                var block = Block(new[] {value, buff},
+                    assignBuff,
+                    ifThen,
+                    assignValue,
+                    @return,
+                    end);
+                IocExpression expression = Lambda<Func<object>>(block);
+                var compile = expression.Compile();
+                info.InternalVariable = new[] {buff};
+                info.Variable = value;
+                info.Expression = expression;
+                info.BuildFunc = compile;
+                info.KeyExpressions =
+                    new Expression[] {assignBuff, ifThen, assignValue,};
+                info.IsInitialized = true;
+            });
+
+            return buildInfo;
         }
 
         private ServiceDescriptor 寻找或者创建ServiceDescriptor(Type serviceType,
@@ -68,18 +145,18 @@ namespace IocContainer.Containers
             {
                 descriptor = 创建特殊类型的ServiceDescriptor(serviceType, rawKey);
                 Storage.AddService(descriptor);
-                为特殊类型创建BuildInfo(descriptor);
-
-                return descriptor;
+            }
+            else
+            {
+                descriptor = new ServiceDescriptor()
+                {
+                    Lifetime = ServiceLifetime.Transient,
+                    ServiceKey = rawKey,
+                    ServiceType = serviceType,
+                    ImplementationType = serviceType
+                };
             }
 
-            descriptor = new ServiceDescriptor()
-            {
-                Lifetime = ServiceLifetime.Transient,
-                ServiceKey = rawKey,
-                ServiceType = serviceType,
-                ImplementationType = serviceType
-            };
             Storage.AddService(descriptor);
 
             return descriptor;
@@ -93,13 +170,15 @@ namespace IocContainer.Containers
                 Lifetime = ServiceLifetime.Transient,
                 ServiceKey = rawKey,
                 ServiceType = serviceType,
-                ImplementationType = serviceType
+                ImplementationType = serviceType,
+                IscanHandlSpecialType = true,
             };
         }
 
-        private void 为特殊类型创建BuildInfo(ServiceDescriptor descriptor)
+        private ContainerInstanceBuildInfo 创建特殊类型的BuildInfo(
+            ServiceDescriptor descriptor)
         {
-            var buildInfo = new ContainerInstanceBuildInfo(descriptor);
+            var buildInfo = new ContainerInstanceBuildInfo(descriptor, Storage);
             buildInfo.SetPrecompileFactory(info =>
             {
                 var serviceType = info.ServiceDescriptor.ServiceType;
@@ -108,7 +187,7 @@ namespace IocContainer.Containers
                 var assign = Assign(value, Default(implementationType));
                 var (@return, end) = CreateEndExpression(value);
                 var block = Block(new[] {value,}, assign, @return, end);
-                Expression<Func<object>> expression = Lambda<Func<object>>(block);
+                IocExpression expression = Lambda<Func<object>>(block);
                 var compile = expression.Compile();
                 info.Variable = value;
                 info.Expression = expression;
@@ -116,7 +195,8 @@ namespace IocContainer.Containers
                 info.BuildFunc = compile;
                 info.IsInitialized = true;
             });
-            Storage.AddBuildInfo(descriptor, buildInfo);
+
+            return buildInfo;
         }
 
         private static (GotoExpression @return, LabelExpression end)

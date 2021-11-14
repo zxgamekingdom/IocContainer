@@ -31,6 +31,7 @@ namespace IocContainer.Containers
         /// 生命周期
         /// </summary>
         public ServiceLifetime Lifetime { get; internal set; }
+        public bool IscanHandlSpecialType { get; internal set; }
 
         public override string ToString()
         {

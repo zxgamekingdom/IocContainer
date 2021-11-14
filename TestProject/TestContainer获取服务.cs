@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using IocContainer.Containers;
+using TestProject.测试数据;
 using Xunit;
 
 namespace TestProject
@@ -28,12 +29,22 @@ namespace TestProject
         [Fact]
         public void Test_指定实现实例()
         {
-            // var container = new Container();
-            // container.AddService<IA, A>(new A());
-            // var service = container.GetService(typeof(A));
-            // var service1 = container.GetService(typeof(A));
-            // Assert.IsType<A>(service);
-            // Assert.Equal(service1, service);
+            {
+                var container = new Container();
+                container.AddService<IA, A>(new A());
+                var service = container.GetService<IA>();
+                var service1 = container.GetService<IA>();
+                Assert.IsType<A>(service);
+                Assert.Equal(service1, service);
+            }
+            {
+                var container = new Container();
+                container.AddService(new A(), ServiceLifetime.Singleton);
+                var service = container.GetService<A>();
+                var service1 = container.GetService<A>();
+                Assert.IsType<A>(service);
+                Assert.Equal(service1, service);
+            }
         }
     }
 }

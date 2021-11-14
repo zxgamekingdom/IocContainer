@@ -16,9 +16,9 @@ namespace IocContainer.Containers
         public Dictionary<Type, Dictionary<object, ServiceDescriptor>>
             ServiceDescriptors { get; } = new();
         //区域字典
-        public Dictionary<ServiceDescriptor, object> ScopedCahce { get; } = new();
+        public Dictionary<ServiceDescriptor, object> ScopedCache { get; } = new();
         //单例字典
-        public Dictionary<ServiceDescriptor, object> SingletonCahce { get; } = new();
+        public Dictionary<ServiceDescriptor, object> SingletonCache { get; } = new();
 
         internal void AddService(ServiceDescriptor descriptor)
         {
@@ -86,8 +86,7 @@ namespace IocContainer.Containers
         internal void AddBuildInfo(ServiceDescriptor descriptor,
             ContainerInstanceBuildInfo buildInfo)
         {
-            if (ServiceDescriptors.TryGetValue(descriptor.ServiceType,
-                    out var value) &&
+            if (ServiceDescriptors.TryGetValue(descriptor.ServiceType, out var value) &&
                 value!.TryGetValue(descriptor.ServiceKey, out _))
             {
                 if (BuildInfos.ContainsKey(descriptor))
@@ -109,6 +108,35 @@ namespace IocContainer.Containers
             BuildInfos.TryGetValue(serviceDescriptor, out var info);
 
             return info;
+        }
+
+        public object? FindInstanceFromCache(ServiceDescriptor serviceDescriptor)
+        {
+            return serviceDescriptor.Lifetime switch
+            {
+                ServiceLifetime.Scoped when ScopedCache.TryGetValue(serviceDescriptor,
+                    out var scoped) => scoped,
+                ServiceLifetime.Singleton when SingletonCache.TryGetValue(
+                    serviceDescriptor,
+                    out var singleton) => singleton,
+                _ => default
+            };
+        }
+
+        internal void AddInstanceToCache(ServiceDescriptor serviceDescriptor,
+            object instance)
+        {
+            switch (serviceDescriptor.Lifetime)
+            {
+                case ServiceLifetime.Scoped:
+                    ScopedCache.Add(serviceDescriptor, instance);
+
+                    break;
+                case ServiceLifetime.Singleton:
+                    SingletonCache.Add(serviceDescriptor, instance);
+
+                    break;
+            }
         }
     }
 }
