@@ -116,7 +116,7 @@ namespace IocContainer.Containers
             var nodeServiceDescriptor = node.ServiceDescriptor;
             var value = Variable(nodeServiceDescriptor.ServiceType);
             List<Expression> keyExpressions = new(10);
-            List<ParameterExpression> parameterExpressions = new(10);
+            HashSet<ParameterExpression> parameterExpressions = new(10);
 
             if (nodeServiceDescriptor.Lifetime is ServiceLifetime.Scoped or
                 ServiceLifetime.Singleton)
@@ -154,7 +154,7 @@ namespace IocContainer.Containers
                     }));
             }
 
-            parameterExpressions.AddRange(获取所有子节点的变量(node));
+            HashSetExtenisons.AddRange(parameterExpressions, 获取所有子节点的变量(node));
             var (@return, end) = node.Builder.CreateEndExpression(value);
             var block = Block(parameterExpressions.Concat(new[] {value,}),
                 keyExpressions.Concat(new Expression[] {@return, end}));
@@ -168,9 +168,33 @@ namespace IocContainer.Containers
                     Variable = value,
                     BuildFunc = compile,
                     InternalVariable = parameterExpressions.ToArray(),
-                    KeyExpressions = keyExpressions.ToArray()
+                    KeyExpressions = keyExpressions.ToArray(),
+                    关联的ServiceDescriptors = 获取所有子节点的服务描述(node)
                 };
             node.Builder.Storage.AddBuildInfo(nodeServiceDescriptor, node.BuildInfo);
+        }
+
+        private HashSet<ServiceDescriptor> 获取所有子节点的服务描述(in Node node)
+        {
+            var stack = new Stack<Node>();
+            stack.Push(node);
+            var list = new List<ServiceDescriptor>();
+
+            while (StackExtensions.TryPop(stack, out var value))
+            {
+                var value1 = value;
+                var array = value!.必选参数?.Select(tuple =>
+                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
+                    .ToArray();
+
+                if (array != null)
+                {
+                    stack.PushArray(array);
+                    list.AddRange(array.Select(node1 => node1.ServiceDescriptor));
+                }
+            }
+
+            return list.ToHashSet();
         }
 
         private ParameterExpression[] 获取所有子节点的变量(in Node node)
@@ -285,6 +309,7 @@ namespace IocContainer.Containers
                     var list = new List<Node>();
                     Node buff = x;
                     list.Add(buff);
+
                     while (buff.Parent != null)
                     {
                         list.Add(buff.Parent);
@@ -292,8 +317,10 @@ namespace IocContainer.Containers
                     }
 
                     list.Reverse();
-                    var s = string.Join("->",list.Select(node1 => $@"""{node1.ServiceDescriptor.ServiceType
-                    }"":""{node1.ServiceDescriptor.ServiceKey}"""));
+                    var s = string.Join("->",
+                        list.Select(node1 =>
+                            $@"""{node1.ServiceDescriptor.ServiceType}"":""{
+                                node1.ServiceDescriptor.ServiceKey}"""));
 
                     throw new InvalidOperationException($@"在构造""{tuple.ServiceType
                     }"":""{tuple.ServiceKey}""时产生了循环依赖.构造链为:{s}");

@@ -30,7 +30,7 @@ namespace TestProject
             var variable = Variable(typeof(int));
             var parameter = Parameter(typeof(int));
             var endTarget = Label(variable.Type);
-            var expressions = new List<Expression>()
+            var expressions = new List<Expression>
             {
                 Assign(variable, parameter),
                 IfThen(Equal(variable, Constant(0)),

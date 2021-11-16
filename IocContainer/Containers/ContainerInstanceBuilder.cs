@@ -397,11 +397,10 @@ namespace IocContainer.Containers
             if (serviceType.是不是可以处理特殊类型())
             {
                 descriptor = 创建特殊类型的ServiceDescriptor(serviceType, rawKey);
-                Storage.AddService(descriptor);
             }
             else
             {
-                descriptor = new ServiceDescriptor()
+                descriptor = new ServiceDescriptor
                 {
                     Lifetime = ServiceLifetime.Transient,
                     ServiceKey = rawKey,
@@ -418,7 +417,7 @@ namespace IocContainer.Containers
         public ServiceDescriptor 创建特殊类型的ServiceDescriptor(Type serviceType,
             object rawKey)
         {
-            return new ServiceDescriptor()
+            return new ServiceDescriptor
             {
                 Lifetime = ServiceLifetime.Transient,
                 ServiceKey = rawKey,

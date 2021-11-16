@@ -68,8 +68,18 @@ namespace TestProject.测试数据
 
     public class 链式2
     {
+        public 链式3 链式3 { get; }
+
+        public 链式2(链式3 链式3)
+        {
+            this.链式3 = 链式3;
+        }
     }
 
+    public class 链式3
+    {
+        public int I { get; set; }
+    }
     public class 默认值
     {
         public 默认值(int I = int.MaxValue)

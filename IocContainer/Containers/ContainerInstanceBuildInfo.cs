@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -14,9 +15,7 @@ namespace IocContainer.Containers
         public Func<object> BuildFunc { get; internal set; } = null!;
         public ParameterExpression[]? InternalVariable { get; internal set; }
         public ConstructorInfo? 选中的构造函数 { get; internal set; }
-        public (Type ParameterType, object Key)[]? 关联的必选参数 { get; internal set; }
-        public ParameterInfo[]? 关联的可选参数 { get; internal set; }
-        public (Type ParameterType, ServiceDescriptor)[]? 关联的必选参数的ServiceDescriptor
+        public HashSet<ServiceDescriptor>? 关联的ServiceDescriptors
         {
             get;
             internal set;

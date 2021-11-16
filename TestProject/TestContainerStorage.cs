@@ -8,6 +8,21 @@ namespace TestProject
     public class TestContainerStorage
     {
         [Fact]
+        public void Test_有ServiceDescriptor变更时()
+        {
+            var container = new Container();
+            var service = container.GetService<链式2>();
+            Assert.Equal(0, service.链式3.I);
+            container.AddService(_ => new 链式3 {I = 233});
+            var l3 = container.GetService<链式3>();
+            Assert.Equal(233, l3.I);
+            var service1 = container.GetService<链式2>();
+            Assert.NotEqual(service, service1);
+            Assert.NotEqual(service.链式3, service1.链式3);
+            Assert.Equal(233, service1.链式3.I);
+        }
+
+        [Fact]
         public void Test_添加可以处理的特殊服务()
         {
             var container = new Container();

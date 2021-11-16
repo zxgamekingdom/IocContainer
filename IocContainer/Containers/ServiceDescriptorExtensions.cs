@@ -9,7 +9,7 @@
             this ServiceDescriptor<TService, TImplementation> descriptor)
             where TImplementation : TService
         {
-            return new ServiceDescriptor()
+            return new ServiceDescriptor
             {
                 ServiceType = descriptor.ServiceType,
                 ImplementationType = descriptor.ImplementationType,

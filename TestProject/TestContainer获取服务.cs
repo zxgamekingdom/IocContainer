@@ -8,6 +8,7 @@ namespace TestProject
 {
     public class TestContainer获取服务
     {
+       
         [Fact]
         public void Test_循环依赖的类型()
         {
@@ -31,8 +32,8 @@ namespace TestProject
                 Assert.NotEqual(container.GetService<链式1>(),
                     container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(2, storage.ServiceDescriptors.Count);
-                Assert.Equal(2, storage.BuildInfos.Count);
+                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Empty(storage.ScopedCache);
                 Assert.Empty(storage.SingletonCache);
             }
@@ -44,8 +45,8 @@ namespace TestProject
                 Assert.IsType<链式1>(service);
                 Assert.Equal(container.GetService<链式1>(), container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(2, storage.ServiceDescriptors.Count);
-                Assert.Equal(2, storage.BuildInfos.Count);
+                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Single(storage.ScopedCache);
                 Assert.Empty(storage.SingletonCache);
             }
@@ -57,8 +58,8 @@ namespace TestProject
                 Assert.IsType<链式1>(service);
                 Assert.Equal(container.GetService<链式1>(), container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(2, storage.ServiceDescriptors.Count);
-                Assert.Equal(2, storage.BuildInfos.Count);
+                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Empty(storage.ScopedCache);
                 Assert.Single(storage.SingletonCache);
             }
