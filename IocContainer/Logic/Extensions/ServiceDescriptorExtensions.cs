@@ -1,4 +1,6 @@
-﻿namespace IocContainer.Containers
+﻿using IocContainer.Logic.DataStructures;
+
+namespace IocContainer.Logic.Extensions
 {
     /// <summary>
     /// ServiceDescriptor扩展函数类

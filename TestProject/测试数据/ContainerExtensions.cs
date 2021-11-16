@@ -1,5 +1,6 @@
 using System.Reflection;
-using IocContainer.Containers;
+using IocContainer;
+using IocContainer.Logic.DataStructures;
 
 namespace TestProject.²âÊÔÊı¾İ
 {

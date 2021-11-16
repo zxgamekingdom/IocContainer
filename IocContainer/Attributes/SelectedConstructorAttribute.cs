@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IocContainer.Containers
+namespace IocContainer.Attributes
 {
     [AttributeUsage(AttributeTargets.Constructor,
         Inherited = false,

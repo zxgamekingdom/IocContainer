@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using IocContainer.Containers;
+using IocContainer.Logic.Extensions;
 using TestProject.²âÊÔÊı¾İ;
 using Xunit;
 

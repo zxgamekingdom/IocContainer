@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.Extensions
 {
     internal static class HashSetExtenisons
     {

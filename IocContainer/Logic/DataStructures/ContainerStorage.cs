@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using IocContainer.Logic.Extensions;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.DataStructures
 {
     //Container存储类
     public class ContainerStorage

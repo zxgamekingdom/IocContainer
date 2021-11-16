@@ -1,6 +1,7 @@
 ﻿using System;
+using IocContainer.Logic.DataStructures;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.Extensions
 {
     public static class ContainerExtensions
     {

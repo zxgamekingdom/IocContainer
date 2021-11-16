@@ -1,6 +1,8 @@
 ﻿using System;
+using IocContainer.Logic;
+using IocContainer.Logic.DataStructures;
 
-namespace IocContainer.Containers
+namespace IocContainer
 {
     public class Container : MarshalByRefObject
     {

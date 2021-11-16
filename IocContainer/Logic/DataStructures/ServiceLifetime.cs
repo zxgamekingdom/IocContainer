@@ -1,4 +1,4 @@
-﻿namespace IocContainer.Containers
+﻿namespace IocContainer.Logic.DataStructures
 {
     /// <summary>
     /// 生命周期

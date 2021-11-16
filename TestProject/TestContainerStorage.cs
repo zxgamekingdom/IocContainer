@@ -1,6 +1,8 @@
 using System;
-using IocContainer.Containers;
-using TestProject.²âÊÔÊı¾İ;
+using IocContainer;
+using IocContainer.Logic.DataStructures;
+using IocContainer.Logic.Extensions;
+using TestProject.æµ‹è¯•æ•°æ®;
 using Xunit;
 
 namespace TestProject
@@ -8,22 +10,22 @@ namespace TestProject
     public class TestContainerStorage
     {
         [Fact]
-        public void Test_ÓĞServiceDescriptor±ä¸üÊ±()
+        public void Test_æœ‰ServiceDescriptorå˜æ›´æ—¶()
         {
             var container = new Container();
-            var service = container.GetService<Á´Ê½2>();
-            Assert.Equal(0, service.Á´Ê½3.I);
-            container.AddService(_ => new Á´Ê½3 {I = 233});
-            var l3 = container.GetService<Á´Ê½3>();
+            var service = container.GetService<é“¾å¼2>();
+            Assert.Equal(0, service.é“¾å¼3.I);
+            container.AddService(_ => new é“¾å¼3 {I = 233});
+            var l3 = container.GetService<é“¾å¼3>();
             Assert.Equal(233, l3.I);
-            var service1 = container.GetService<Á´Ê½2>();
+            var service1 = container.GetService<é“¾å¼2>();
             Assert.NotEqual(service, service1);
-            Assert.NotEqual(service.Á´Ê½3, service1.Á´Ê½3);
-            Assert.Equal(233, service1.Á´Ê½3.I);
+            Assert.NotEqual(service.é“¾å¼3, service1.é“¾å¼3);
+            Assert.Equal(233, service1.é“¾å¼3.I);
         }
 
         [Fact]
-        public void Test_Ìí¼Ó¿ÉÒÔ´¦ÀíµÄÌØÊâ·şÎñ()
+        public void Test_æ·»åŠ å¯ä»¥å¤„ç†çš„ç‰¹æ®ŠæœåŠ¡()
         {
             var container = new Container();
             Assert.ThrowsAny<ArgumentException>(() => container.AddService<int>());
@@ -49,7 +51,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_ÖØ¸´Ìí¼Ó·şÎñ()
+        public void Test_é‡å¤æ·»åŠ æœåŠ¡()
         {
             var container = new Container();
             var gDescriptor = new ServiceDescriptor<IA, A>();
@@ -61,7 +63,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_Ìí¼Ó·şÎñ()
+        public void Test_æ·»åŠ æœåŠ¡()
         {
             var container = new Container();
             var gDescriptor = new ServiceDescriptor<IA, A>();

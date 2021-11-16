@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.Extensions
 {
     public static class TypeExtensions
     {

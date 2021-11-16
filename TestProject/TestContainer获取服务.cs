@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using IocContainer.Containers;
+using IocContainer;
+using IocContainer.Logic.DataStructures;
+using IocContainer.Logic.Extensions;
 using TestProject.²âÊÔÊı¾İ;
 using Xunit;
 

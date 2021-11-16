@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using IocContainer.Attributes;
+using IocContainer.Logic.DataStructures;
+using IocContainer.Logic.Extensions;
 using static System.Linq.Expressions.Expression;
 using IocExpression = System.Linq.Expressions.Expression<System.Func<object>>;
 using IocGetFromCacheExpression =
     System.Linq.Expressions.Expression<System.Func<
-        IocContainer.Containers.ContainerStorage,
-        IocContainer.Containers.ServiceDescriptor, object?>>;
+        IocContainer.Logic.DataStructures.ContainerStorage,
+        IocContainer.Logic.DataStructures.ServiceDescriptor, object?>>;
 using IocAddToCacheExpression =
     System.Linq.Expressions.Expression<System.Action<
-        IocContainer.Containers.ContainerStorage,
-        IocContainer.Containers.ServiceDescriptor, object>>;
+        IocContainer.Logic.DataStructures.ContainerStorage,
+        IocContainer.Logic.DataStructures.ServiceDescriptor, object>>;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic
 {
     public readonly struct 有依赖项类型的BuildInfoBuilder
     {

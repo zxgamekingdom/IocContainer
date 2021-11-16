@@ -1,4 +1,4 @@
-namespace IocContainer.Containers
+namespace IocContainer.Logic.DataStructures
 {
     public record NullKey
     {

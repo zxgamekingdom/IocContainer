@@ -1,6 +1,7 @@
 using System;
+using IocContainer.Logic.DataStructures;
 
-namespace IocContainer.Containers
+namespace IocContainer.Attributes
 {
     [AttributeUsage(
         AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field,

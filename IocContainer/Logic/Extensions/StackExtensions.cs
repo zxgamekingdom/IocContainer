@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.Extensions
 {
     public static class StackExtensions
     {

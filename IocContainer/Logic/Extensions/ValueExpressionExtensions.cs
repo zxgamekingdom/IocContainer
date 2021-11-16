@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace IocContainer.Containers
+namespace IocContainer.Logic.Extensions
 {
     internal static class ValueExpressionExtensions
     {
