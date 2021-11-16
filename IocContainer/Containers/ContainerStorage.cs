@@ -67,7 +67,7 @@ namespace IocContainer.Containers
             //TODO 当移除ServiceDescriptor时
         }
 
-        public ServiceDescriptor? FindServiceDescriptor(Type serviceType, object rawKey)
+        public ServiceDescriptor? GetServiceDescriptor(Type serviceType, object rawKey)
         {
             if (ServiceDescriptors.TryGetValue(serviceType, out var value) &&
                 value.TryGetValue(rawKey, out var descriptor))
@@ -102,7 +102,7 @@ namespace IocContainer.Containers
             throw new InvalidOperationException($"为{descriptor}添加构造信息失败");
         }
 
-        public ContainerInstanceBuildInfo? FindBuildInfo(
+        public ContainerInstanceBuildInfo? GetBuildInfo(
             ServiceDescriptor serviceDescriptor)
         {
             BuildInfos.TryGetValue(serviceDescriptor, out var info);
@@ -110,7 +110,7 @@ namespace IocContainer.Containers
             return info;
         }
 
-        public object? FindInstanceFromCache(ServiceDescriptor serviceDescriptor)
+        public object? GetInstanceFromCache(ServiceDescriptor serviceDescriptor)
         {
             return serviceDescriptor.Lifetime switch
             {

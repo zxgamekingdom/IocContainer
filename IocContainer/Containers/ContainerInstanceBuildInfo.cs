@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IocContainer.Containers
 {
@@ -10,18 +11,15 @@ namespace IocContainer.Containers
         public ParameterExpression Variable { get; internal set; } = null!;
         public Expression<Func<object>> Expression { get; internal set; } = null!;
         public Expression[] KeyExpressions { get; internal set; } = null!;
-        public bool IsInitialized { get; internal set; }
         public Func<object> BuildFunc { get; internal set; } = null!;
-        private Action<ContainerInstanceBuildInfo>? PrecompileFactory { get; set; }
         public ParameterExpression[]? InternalVariable { get; internal set; }
-
-        public void Precompile()
+        public ConstructorInfo? 选中的构造函数 { get; internal set; }
+        public (Type ParameterType, object Key)[]? 关联的必选参数 { get; internal set; }
+        public ParameterInfo[]? 关联的可选参数 { get; internal set; }
+        public (Type ParameterType, ServiceDescriptor)[]? 关联的必选参数的ServiceDescriptor
         {
-            if (PrecompileFactory != null)
-                PrecompileFactory.Invoke(this);
-            else
-                throw new InvalidOperationException($@"未调用{nameof(SetPrecompileFactory)
-                }方法");
+            get;
+            internal set;
         }
 
         public ContainerInstanceBuildInfo(ServiceDescriptor serviceDescriptor,
@@ -29,11 +27,6 @@ namespace IocContainer.Containers
         {
             ServiceDescriptor = serviceDescriptor;
             Storage = storage;
-        }
-
-        public void SetPrecompileFactory(Action<ContainerInstanceBuildInfo> action)
-        {
-            PrecompileFactory = action;
         }
     }
 }

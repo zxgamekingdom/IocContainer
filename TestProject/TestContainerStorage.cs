@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using IocContainer.Containers;
 using TestProject.测试数据;
 using Xunit;
@@ -12,11 +11,8 @@ namespace TestProject
         public void Test_添加可以处理的特殊服务()
         {
             var container = new Container();
-            Assert.ThrowsAny<ArgumentException>(() => { container.AddService<int>(); });
-            Assert.ThrowsAny<ArgumentException>(() =>
-            {
-                container.AddService<string>();
-            });
+            Assert.ThrowsAny<ArgumentException>(() => container.AddService<int>());
+            Assert.ThrowsAny<ArgumentException>(() => container.AddService<string>());
             Assert.Null(TryException(() => container.AddService<A>()));
             Assert.NotNull(TryException(() => container.AddService<double>()));
         }
@@ -45,7 +41,7 @@ namespace TestProject
             var descriptor = gDescriptor.ToServiceDescriptor();
             container.AddService(gDescriptor);
             container.AddService(gDescriptor);
-            var storage = GetStorage(container);
+            var storage = container.GetStorage();
             Assert.Single(storage.ServiceDescriptors[descriptor.ServiceType]);
         }
 
@@ -56,18 +52,11 @@ namespace TestProject
             var gDescriptor = new ServiceDescriptor<IA, A>();
             var descriptor = gDescriptor.ToServiceDescriptor();
             container.AddService(gDescriptor);
-            var storage = GetStorage(container);
+            var storage = container.GetStorage();
             Assert.Equal(
                 storage.ServiceDescriptors[descriptor.ServiceType][
                     descriptor.ServiceKey],
                 descriptor);
-        }
-
-        private static ContainerStorage GetStorage(Container container)
-        {
-            return (ContainerStorage) container.GetType()
-                .GetProperty("Storage", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .GetValue(container);
         }
     }
 }

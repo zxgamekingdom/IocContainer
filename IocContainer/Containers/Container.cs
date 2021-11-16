@@ -2,7 +2,7 @@
 
 namespace IocContainer.Containers
 {
-    public class Container
+    public class Container : MarshalByRefObject
     {
         internal ContainerStorage Storage { get; }
 

@@ -1,9 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net5.0</TargetFrameworks>
+    <TargetFrameworks>net48;net6.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="_ReSharper.Caches\**" />
+    <EmbeddedResource Remove="_ReSharper.Caches\**" />
+    <None Remove="_ReSharper.Caches\**" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
