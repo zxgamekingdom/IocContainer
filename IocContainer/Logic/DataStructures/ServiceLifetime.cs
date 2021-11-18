@@ -1,4 +1,4 @@
-﻿namespace IocContainer.Logic.DataStructures
+﻿namespace Zt.Containers.Logic.DataStructures
 {
     /// <summary>
     /// 生命周期

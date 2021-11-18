@@ -2,9 +2,9 @@ using System;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using IocContainer.Logic.Extensions;
 using TestProject.测试数据;
 using Xunit;
+using Zt.Containers.Logic.Extensions;
 
 namespace TestProject
 {
@@ -66,7 +66,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_是不是可以处理特殊类型()
+        public void 是不是可以处理特殊类型()
         {
             Assert.True(typeof(int).是不是可以处理特殊类型());
             Assert.True(typeof(double).是不是可以处理特殊类型());
@@ -79,7 +79,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_是不是不能处理的特殊类型()
+        public void 是不是不能处理的特殊类型()
         {
             Assert.True(typeof(IA).是不是不能处理的特殊类型());
             Assert.True(typeof(AbsA).是不是不能处理的特殊类型());

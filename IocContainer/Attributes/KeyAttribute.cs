@@ -1,7 +1,7 @@
 using System;
-using IocContainer.Logic.DataStructures;
+using Zt.Containers.Logic.DataStructures;
 
-namespace IocContainer.Attributes
+namespace Zt.Containers.Attributes
 {
     [AttributeUsage(
         AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field,

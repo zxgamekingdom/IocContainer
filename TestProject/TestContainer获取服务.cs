@@ -1,18 +1,83 @@
 using System;
 using System.Threading.Tasks;
-using IocContainer;
-using IocContainer.Logic.DataStructures;
-using IocContainer.Logic.Extensions;
 using TestProject.测试数据;
 using Xunit;
+using Zt.Containers;
+using Zt.Containers.Logic.DataStructures;
+using Zt.Containers.Logic.Extensions;
 
 namespace TestProject
 {
     public class TestContainer获取服务
     {
-       
         [Fact]
-        public void Test_循环依赖的类型()
+        public void 特殊生命周期()
+        {
+            {
+                var container = new Container();
+                container.AddService<A>();
+                Assert.NotSame(container.GetService<A>(), container.GetService<A>());
+                container.AddService(_ => new A(), ServiceLifetime.Transient, "Func");
+                Assert.NotSame(container.GetService<A>("Func"),
+                    container.GetService<A>("Func"));
+                Assert.ThrowsAny<Exception>(() =>
+                {
+                    container.AddService<A>(new A(),
+                        ServiceLifetime.Transient,
+                        "Instance");
+                });
+                container.AddService<默认值>();
+                Assert.NotSame(container.GetService<默认值>(),
+                    container.GetService<默认值>());
+                container.AddService<CtorAllOption>();
+                Assert.NotSame(container.GetService<CtorAllOption>(),
+                    container.GetService<CtorAllOption>());
+                container.AddService<链式1>();
+                Assert.NotSame(container.GetService<链式1>(),
+                    container.GetService<链式1>());
+            }
+            {
+                var container = new Container();
+                container.AddService<A>(ServiceLifetime.Scoped);
+                Assert.Same(container.GetService<A>(), container.GetService<A>());
+                container.AddService<A>(_ => new A(), ServiceLifetime.Scoped, "Func");
+                Assert.Same(container.GetService<A>("Func"),
+                    container.GetService<A>("Func"));
+                container.AddService<A>(new A(), ServiceLifetime.Scoped, "Instance");
+                Assert.Same(container.GetService<A>("Instance"),
+                    container.GetService<A>("Instance"));
+                container.AddService<默认值>(ServiceLifetime.Scoped);
+                Assert.Same(container.GetService<默认值>(), container.GetService<默认值>());
+                container.AddService<CtorAllOption>(ServiceLifetime.Scoped);
+                Assert.Same(container.GetService<CtorAllOption>(),
+                    container.GetService<CtorAllOption>());
+                container.AddService<链式1>(ServiceLifetime.Scoped);
+                Assert.Same(container.GetService<链式1>(), container.GetService<链式1>());
+            }
+            {
+                var container = new Container();
+                container.AddService<A>(ServiceLifetime.Singleton);
+                Assert.Same(container.GetService<A>(), container.GetService<A>());
+                container.AddService<A>(_ => new A(),
+                    ServiceLifetime.Singleton,
+                    "Func");
+                Assert.Same(container.GetService<A>("Func"),
+                    container.GetService<A>("Func"));
+                container.AddService<A>(new A(), ServiceLifetime.Singleton, "Instance");
+                Assert.Same(container.GetService<A>("Instance"),
+                    container.GetService<A>("Instance"));
+                container.AddService<默认值>(ServiceLifetime.Singleton);
+                Assert.Same(container.GetService<默认值>(), container.GetService<默认值>());
+                container.AddService<CtorAllOption>(ServiceLifetime.Singleton);
+                Assert.Same(container.GetService<CtorAllOption>(),
+                    container.GetService<CtorAllOption>());
+                container.AddService<链式1>(ServiceLifetime.Singleton);
+                Assert.Same(container.GetService<链式1>(), container.GetService<链式1>());
+            }
+        }
+
+        [Fact]
+        public void 循环依赖的类型()
         {
             var container = new Container();
             Assert.ThrowsAny<Exception>(() => container.GetService<LoopA>());
@@ -20,11 +85,14 @@ namespace TestProject
             Assert.Empty(storage.BuildInfos);
             Assert.Empty(storage.ScopedCache);
             Assert.Empty(storage.SingletonCache);
-            Assert.Equal(3, storage.ServiceDescriptors.Count);
+            Assert.Equal(3,
+                storage.TransientServiceDescriptors.Count +
+                storage.ScopedServiceDescriptors.Count +
+                storage.SingletonServiceDescriptors.Count);
         }
 
         [Fact]
-        public void Test_有依赖项的类型()
+        public void 有依赖项的类型()
         {
             {
                 var container = new Container();
@@ -34,7 +102,7 @@ namespace TestProject
                 Assert.NotEqual(container.GetService<链式1>(),
                     container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3, storage.TransientServiceDescriptors.Count);
                 Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Empty(storage.ScopedCache);
                 Assert.Empty(storage.SingletonCache);
@@ -47,7 +115,9 @@ namespace TestProject
                 Assert.IsType<链式1>(service);
                 Assert.Equal(container.GetService<链式1>(), container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3,
+                    storage.TransientServiceDescriptors.Count +
+                    storage.ScopedServiceDescriptors.Count);
                 Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Single(storage.ScopedCache);
                 Assert.Empty(storage.SingletonCache);
@@ -60,7 +130,9 @@ namespace TestProject
                 Assert.IsType<链式1>(service);
                 Assert.Equal(container.GetService<链式1>(), container.GetService<链式1>());
                 var storage = container.GetStorage();
-                Assert.Equal(3, storage.ServiceDescriptors.Count);
+                Assert.Equal(3,
+                    storage.SingletonServiceDescriptors.Count +
+                    storage.TransientServiceDescriptors.Count);
                 Assert.Equal(3, storage.BuildInfos.Count);
                 Assert.Empty(storage.ScopedCache);
                 Assert.Single(storage.SingletonCache);
@@ -68,7 +140,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_构造函数全是可选参数的类型()
+        public void 构造函数全是可选参数的类型()
         {
             {
                 var container = new Container();
@@ -108,7 +180,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_获取特殊类型()
+        public void 获取特殊类型()
         {
             var container = new Container();
             Assert.Equal(0, container.GetService(typeof(int)));
@@ -118,7 +190,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_指定实现工厂()
+        public void 指定实现工厂()
         {
             {
                 var container = new Container();
@@ -145,7 +217,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_指定实现实例()
+        public void 指定实现实例()
         {
             {
                 var container = new Container();
@@ -170,7 +242,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_指定构造函数无形参的类型()
+        public void 指定构造函数无形参的类型()
         {
             {
                 var container = new Container();

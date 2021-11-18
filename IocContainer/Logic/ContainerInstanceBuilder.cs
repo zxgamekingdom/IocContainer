@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using IocContainer.Attributes;
-using IocContainer.Logic.DataStructures;
-using IocContainer.Logic.Extensions;
+using Zt.Containers.Attributes;
+using Zt.Containers.Logic.DataStructures;
+using Zt.Containers.Logic.Extensions;
 using static System.Linq.Expressions.Expression;
 using IocExpression = System.Linq.Expressions.Expression<System.Func<object>>;
 using IocGetFromCacheExpression =
     System.Linq.Expressions.Expression<System.Func<
-        IocContainer.Logic.DataStructures.ContainerStorage,
-        IocContainer.Logic.DataStructures.ServiceDescriptor, object?>>;
+        Zt.Containers.Logic.DataStructures.ContainerStorage,
+        Zt.Containers.Logic.DataStructures.ServiceDescriptor, object?>>;
 using IocAddToCacheExpression =
     System.Linq.Expressions.Expression<System.Action<
-        IocContainer.Logic.DataStructures.ContainerStorage,
-        IocContainer.Logic.DataStructures.ServiceDescriptor, object>>;
+        Zt.Containers.Logic.DataStructures.ContainerStorage,
+        Zt.Containers.Logic.DataStructures.ServiceDescriptor, object>>;
 
-namespace IocContainer.Logic
+namespace Zt.Containers.Logic
 {
     public readonly struct ContainerInstanceBuilder
     {
@@ -205,13 +205,13 @@ namespace IocContainer.Logic
                 IocAddToCacheExpression addToCache =
                     (containerStorage, descriptor, instance) =>
                         containerStorage.AddInstanceToCache(descriptor, instance);
-                keyExpressions.Add(IfThen(Equal(buff, Constant(null)),
-                    Block(Assign(buff, New(buildInfo.ServiceDescriptor.ServiceType)),
+                keyExpressions.Add(IfThenElse(Equal(buff, Constant(null)),
+                    Block(Assign(value, New(buildInfo.ServiceDescriptor.ServiceType)),
                         Invoke(addToCache,
                             Storage.Constant(),
                             serviceDescriptor.Constant(),
-                            buff),
-                        Assign(value, Convert(buff, value.Type)))));
+                            Convert(value, typeof(object)))),
+                    Block(Assign(value, Convert(buff, value.Type)))));
                 variables.Add(buff);
             }
             else
@@ -276,11 +276,11 @@ namespace IocContainer.Logic
                 .Singleton)
             {
                 var buff = Variable(typeof(object));
-                IocGetFromCacheExpression findFromCache =
+                IocGetFromCacheExpression getFromCache =
                     (containerStorage, descriptor1) =>
                         containerStorage.GetInstanceFromCache(descriptor1);
                 var assignBuff = Assign(buff,
-                    Invoke(findFromCache,
+                    Invoke(getFromCache,
                         Constant(buildInfo.Storage),
                         Constant(descriptor)));
                 IocAddToCacheExpression addToCache =
@@ -305,10 +305,13 @@ namespace IocContainer.Logic
             }
             else
             {
+                Expression<Func<ServiceDescriptor, ContainerStorage, object>>
+                    implementationFactory = (descriptor1, storage) =>
+                        descriptor1.ImplementationFactory!.Invoke(storage.Container);
                 var assign = Assign(value,
-                    Convert(Constant(
-                            descriptor.ImplementationFactory!.Invoke(buildInfo.Storage
-                                .Container)),
+                    Convert(Invoke(implementationFactory,
+                            serviceDescriptor.Constant(),
+                            Storage.Constant()),
                         value.Type));
                 keyExpressions.Add(assign);
             }
@@ -344,7 +347,7 @@ namespace IocContainer.Logic
             var value = Variable(descriptor.ServiceType);
             var buff = Variable(typeof(object));
             IocGetFromCacheExpression getFromCache = (storage, descriptor1) =>
-                storage.GetInstanceFromCache(descriptor);
+                storage.GetInstanceFromCache(descriptor1);
             IocAddToCacheExpression addToCache =
                 (containerStorage, descriptor1, instance) =>
                     containerStorage.AddInstanceToCache(descriptor1, instance);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace IocContainer.Logic.DataStructures
+namespace Zt.Containers.Logic.DataStructures
 {
     public record ContainerInstanceBuildInfo
     {

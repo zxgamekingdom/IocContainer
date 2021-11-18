@@ -17,7 +17,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_值元组()
+        public void 值元组()
         {
             var o = new object();
             var type = typeof(A);
@@ -49,7 +49,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_参数()
+        public void 参数()
         {
             var oneParameter =
                 typeof(链式1).GetConstructors().Single().GetParameters()[0];

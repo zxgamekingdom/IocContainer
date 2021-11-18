@@ -1,10 +1,10 @@
 //测试ServiceDescriptorExtensions
 
 using System;
-using IocContainer.Logic.DataStructures;
-using IocContainer.Logic.Extensions;
 using TestProject.测试数据;
 using Xunit;
+using Zt.Containers.Logic.DataStructures;
+using Zt.Containers.Logic.Extensions;
 
 namespace TestProject
 {

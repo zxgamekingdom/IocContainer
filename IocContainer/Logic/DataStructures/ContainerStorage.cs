@@ -1,32 +1,64 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IocContainer.Logic.Extensions;
+using Zt.Containers.Logic.Extensions;
 
-namespace IocContainer.Logic.DataStructures
+namespace Zt.Containers.Logic.DataStructures
 {
     //Container存储类
     public class ContainerStorage
     {
-        public ContainerStorage(Container container)
+        public ContainerStorage(Container container, ContainerStorage? parent = default)
         {
             Container = container;
+
+            if (parent != null)
+            {
+                SingletonCache = parent.SingletonCache;
+                SingletonServiceDescriptors = parent.SingletonServiceDescriptors;
+                ScopedServiceDescriptors =
+                    new Dictionary<Type, Dictionary<object, ServiceDescriptor>>();
+                TransientServiceDescriptors =
+                    new Dictionary<Type, Dictionary<object, ServiceDescriptor>>();
+
+                foreach (var descriptor in parent.ScopedServiceDescriptors
+                    .Select(pair => pair.Value)
+                    .SelectMany(dictionary => dictionary.Values))
+                {
+                    AddService(descriptor);
+                }
+
+                foreach (var descriptor in parent.TransientServiceDescriptors
+                    .Select(pair => pair.Value)
+                    .SelectMany(dictionary => dictionary.Values))
+                {
+                    AddService(descriptor);
+                }
+            }
+            else
+            {
+                SingletonCache = new Dictionary<ServiceDescriptor, object>();
+                SingletonServiceDescriptors =
+                    new Dictionary<Type, Dictionary<object, ServiceDescriptor>>();
+                ScopedServiceDescriptors =
+                    new Dictionary<Type, Dictionary<object, ServiceDescriptor>>();
+                TransientServiceDescriptors =
+                    new Dictionary<Type, Dictionary<object, ServiceDescriptor>>();
+            }
         }
 
-        public Action<ServiceDescriptorRemovedArgs>? WhenServiceDescriptorRemoved
-        {
-            get;
-            set;
-        }
         private readonly object _lock = new();
         public Container Container { get; }
-        //ServiceDescriptor<TService, TImplementation>字典
         public Dictionary<Type, Dictionary<object, ServiceDescriptor>>
-            ServiceDescriptors { get; } = new();
+            SingletonServiceDescriptors { get; }
+        public Dictionary<Type, Dictionary<object, ServiceDescriptor>>
+            ScopedServiceDescriptors { get; }
+        public Dictionary<Type, Dictionary<object, ServiceDescriptor>>
+            TransientServiceDescriptors { get; }
         //区域字典
         public Dictionary<ServiceDescriptor, object> ScopedCache { get; } = new();
         //单例字典
-        public Dictionary<ServiceDescriptor, object> SingletonCache { get; } = new();
+        public Dictionary<ServiceDescriptor, object> SingletonCache { get; }
 
         internal void AddService(ServiceDescriptor descriptor)
         {
@@ -35,10 +67,17 @@ namespace IocContainer.Logic.DataStructures
                 var serviceType = descriptor.ServiceType;
                 var key = descriptor.ServiceKey;
                 Start:
+                var descriptorsStorage = GetServiceDescriptorsStorage(descriptor);
 
-                if (ServiceDescriptors.TryGetValue(serviceType, out var value))
+                foreach (var dictionary in new[]
                 {
-                    if (value.TryGetValue(key, out var value1))
+                    SingletonServiceDescriptors,
+                    ScopedServiceDescriptors,
+                    TransientServiceDescriptors
+                })
+                {
+                    if (dictionary.TryGetValue(serviceType, out var value) &&
+                        value.TryGetValue(key, out var value1))
                     {
                         value.Remove(key);
                         当移除ServiceDescriptor时(value1);
@@ -46,15 +85,32 @@ namespace IocContainer.Logic.DataStructures
                         goto Start;
                     }
                 }
+
+                if (descriptorsStorage.TryGetValue(serviceType, out var dict))
+                {
+                    dict.Add(key, descriptor);
+                }
                 else
                 {
-                    value = new Dictionary<object, ServiceDescriptor>
-                    {
-                        {key, descriptor}
-                    };
-                    ServiceDescriptors.Add(serviceType, value);
+                    descriptorsStorage.Add(serviceType,
+                        new Dictionary<object, ServiceDescriptor> {{key, descriptor}});
                 }
             }
+        }
+
+        private Dictionary<Type, Dictionary<object, ServiceDescriptor>>
+            GetServiceDescriptorsStorage(ServiceDescriptor descriptor)
+        {
+            Dictionary<Type, Dictionary<object, ServiceDescriptor>> serviceDescriptors =
+                descriptor.Lifetime switch
+                {
+                    ServiceLifetime.Transient => TransientServiceDescriptors,
+                    ServiceLifetime.Scoped => ScopedServiceDescriptors,
+                    ServiceLifetime.Singleton => SingletonServiceDescriptors,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+            return serviceDescriptors;
         }
 
         public void AddService<TService, TImplementation>(
@@ -103,15 +159,16 @@ namespace IocContainer.Logic.DataStructures
                 {
                 }
             }
+            var descriptorsStorage = GetServiceDescriptorsStorage(serviceDescriptor);
 
-            foreach (var pair in ServiceDescriptors
+            foreach (var pair in descriptorsStorage
                 .Where(pair => pair.Value?.Count is 0)
                 .ToArray())
             {
-                ServiceDescriptors.Remove(pair.Key);
+                descriptorsStorage.Remove(pair.Key);
             }
 
-            WhenServiceDescriptorRemoved?.Invoke(
+            Container.WhenServiceDescriptorRemoved?.Invoke(
                 new ServiceDescriptorRemovedArgs(serviceDescriptor, value));
         }
 
@@ -119,10 +176,18 @@ namespace IocContainer.Logic.DataStructures
         {
             lock (_lock)
             {
-                if (ServiceDescriptors.TryGetValue(serviceType, out var value) &&
-                    value.TryGetValue(rawKey, out var descriptor))
+                foreach (var dictionary in new[]
                 {
-                    return descriptor!;
+                    SingletonServiceDescriptors,
+                    ScopedServiceDescriptors,
+                    TransientServiceDescriptors
+                })
+                {
+                    if (dictionary.TryGetValue(serviceType, out var value) &&
+                        value.TryGetValue(rawKey, out var descriptor))
+                    {
+                        return descriptor!;
+                    }
                 }
 
                 return default;
@@ -139,8 +204,8 @@ namespace IocContainer.Logic.DataStructures
         {
             lock (_lock)
             {
-                if (ServiceDescriptors.TryGetValue(descriptor.ServiceType,
-                        out var value) &&
+                if (GetServiceDescriptorsStorage(descriptor)
+                        .TryGetValue(descriptor.ServiceType, out var value) &&
                     value!.TryGetValue(descriptor.ServiceKey, out _))
                 {
                     if (BuildInfos.ContainsKey(descriptor))
@@ -167,15 +232,25 @@ namespace IocContainer.Logic.DataStructures
 
         public object? GetInstanceFromCache(ServiceDescriptor serviceDescriptor)
         {
-            return serviceDescriptor.Lifetime switch
+            object? value = null;
+
+            switch (serviceDescriptor.Lifetime)
             {
-                ServiceLifetime.Scoped when ScopedCache.TryGetValue(serviceDescriptor,
-                    out var scoped) => scoped,
-                ServiceLifetime.Singleton when SingletonCache.TryGetValue(
-                    serviceDescriptor,
-                    out var singleton) => singleton,
-                _ => default
-            };
+                case ServiceLifetime.Transient:
+                    break;
+                case ServiceLifetime.Scoped:
+                    ScopedCache.TryGetValue(serviceDescriptor, out value);
+
+                    break;
+                case ServiceLifetime.Singleton:
+                    SingletonCache.TryGetValue(serviceDescriptor, out value);
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return value;
         }
 
         internal void AddInstanceToCache(ServiceDescriptor serviceDescriptor,
@@ -193,6 +268,10 @@ namespace IocContainer.Logic.DataStructures
                         SingletonCache.Add(serviceDescriptor, instance);
 
                         break;
+                    case ServiceLifetime.Transient:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }

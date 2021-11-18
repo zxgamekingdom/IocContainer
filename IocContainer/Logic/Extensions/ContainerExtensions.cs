@@ -1,10 +1,25 @@
 ﻿using System;
-using IocContainer.Logic.DataStructures;
+using Zt.Containers.Logic.DataStructures;
 
-namespace IocContainer.Logic.Extensions
+namespace Zt.Containers.Logic.Extensions
 {
     public static class ContainerExtensions
     {
+        public static bool IsRoot(this Container container)
+        {
+            return container.Parent == null;
+        }
+
+        public static Container GetRootContainer(this Container container)
+        {
+            while (true)
+            {
+                if (container.IsRoot()) return container;
+
+                container = container.Parent!;
+            }
+        }
+
         public static T GetService<T>(this Container container, object? key = null)
         {
             return (T) container.GetService(typeof(T), key);

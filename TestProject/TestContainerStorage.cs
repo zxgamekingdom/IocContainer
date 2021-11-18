@@ -1,16 +1,16 @@
 using System;
-using IocContainer;
-using IocContainer.Logic.DataStructures;
-using IocContainer.Logic.Extensions;
 using TestProject.测试数据;
 using Xunit;
+using Zt.Containers;
+using Zt.Containers.Logic.DataStructures;
+using Zt.Containers.Logic.Extensions;
 
 namespace TestProject
 {
     public class TestContainerStorage
     {
         [Fact]
-        public void Test_有ServiceDescriptor变更时()
+        public void 有ServiceDescriptor变更时()
         {
             var container = new Container();
             var service = container.GetService<链式2>();
@@ -25,7 +25,7 @@ namespace TestProject
         }
 
         [Fact]
-        public void Test_添加可以处理的特殊服务()
+        public void 添加可以处理的特殊服务()
         {
             var container = new Container();
             Assert.ThrowsAny<ArgumentException>(() => container.AddService<int>());
@@ -38,20 +38,14 @@ namespace TestProject
         {
             Exception? ex = null;
 
-            try
-            {
-                action.Invoke();
-            }
-            catch (Exception? e)
-            {
-                ex = e;
-            }
+            try { action.Invoke(); }
+            catch (Exception? e) { ex = e; }
 
             return ex;
         }
 
         [Fact]
-        public void Test_重复添加服务()
+        public void 重复添加服务()
         {
             var container = new Container();
             var gDescriptor = new ServiceDescriptor<IA, A>();
@@ -59,20 +53,21 @@ namespace TestProject
             container.AddService(gDescriptor);
             container.AddService(gDescriptor);
             var storage = container.GetStorage();
-            Assert.Single(storage.ServiceDescriptors[descriptor.ServiceType]);
+            Assert.Single(storage.TransientServiceDescriptors[descriptor.ServiceType]);
         }
 
         [Fact]
-        public void Test_添加服务()
+        public void 添加服务()
         {
             var container = new Container();
             var gDescriptor = new ServiceDescriptor<IA, A>();
             var descriptor = gDescriptor.ToServiceDescriptor();
             container.AddService(gDescriptor);
             var storage = container.GetStorage();
+
             Assert.Equal(
-                storage.ServiceDescriptors[descriptor.ServiceType][
-                    descriptor.ServiceKey],
+                storage.TransientServiceDescriptors[descriptor.ServiceType][descriptor
+                    .ServiceKey],
                 descriptor);
         }
     }

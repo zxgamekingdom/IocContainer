@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace IocContainer.Logic.Extensions
+namespace Zt.Containers.Logic.Extensions
 {
     public static class StackExtensions
     {

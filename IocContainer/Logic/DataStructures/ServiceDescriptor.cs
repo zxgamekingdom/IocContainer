@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IocContainer.Logic.DataStructures
+namespace Zt.Containers.Logic.DataStructures
 {
     /// <summary>
     /// 服务描述文件

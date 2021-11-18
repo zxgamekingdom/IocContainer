@@ -3,6 +3,7 @@
     <TargetFrameworks>net48;net6.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <RootNamespace>Zt.Containers</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="_ReSharper.Caches\**" />

@@ -1,6 +1,6 @@
-﻿using IocContainer.Logic.DataStructures;
+﻿using Zt.Containers.Logic.DataStructures;
 
-namespace IocContainer.Logic.Extensions
+namespace Zt.Containers.Logic.Extensions
 {
     /// <summary>
     /// ServiceDescriptor扩展函数类
