@@ -11,20 +11,6 @@ namespace TestProject
     public class Test系统类型
     {
         [Fact]
-        public void Test_Type()
-        {
-            Assert.Equal(typeof(Assert), typeof(Assert));
-        }
-
-        [Fact]
-        public void 值元组()
-        {
-            var o = new object();
-            var type = typeof(A);
-            Assert.Equal((o, type), (o, typeof(A)));
-        }
-
-        [Fact]
         public void Test_ExpressionReturn()
         {
             var variable = Variable(typeof(int));
@@ -40,12 +26,17 @@ namespace TestProject
                 Return(endTarget, variable),
                 Label(endTarget, Default(variable.Type)),
             };
-            var block = Block(new[] {variable,}, expressions);
+            var block = Block(new[] { variable, }, expressions);
             Expression<Func<int, int>> expression =
                 Lambda<Func<int, int>>(block, parameter);
             var compile = expression.Compile();
             Assert.Equal(13, compile.Invoke(0));
             Assert.Equal(233, compile.Invoke(233));
+        }
+        [Fact]
+        public void Test_Type()
+        {
+            Assert.Equal(typeof(Assert), typeof(Assert));
         }
 
         [Fact]
@@ -57,10 +48,17 @@ namespace TestProject
             var twoParameter =
                 typeof(链式1Copy).GetConstructors().Single().GetParameters()[0];
             Assert.NotEqual(oneParameter, twoParameter);
-            Assert.Equal((oneParameter, (object) 123), (oneParameter, 123));
+            Assert.Equal((oneParameter, (object)123), (oneParameter, 123));
             Assert.Equal((oneParameter, 123), (oneParameter, 123));
-            Assert.NotEqual((object) (oneParameter, 123),
+            Assert.NotEqual((object)(oneParameter, 123),
                 (oneParameter, "123"));
+        }
+        [Fact]
+        public void 值元组()
+        {
+            var o = new object();
+            var type = typeof(A);
+            Assert.Equal((o, type), (o, typeof(A)));
         }
     }
 }

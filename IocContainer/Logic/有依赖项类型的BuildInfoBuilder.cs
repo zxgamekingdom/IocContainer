@@ -7,15 +7,15 @@ using Zt.Containers.Attributes;
 using Zt.Containers.Logic.DataStructures;
 using Zt.Containers.Logic.Extensions;
 using static System.Linq.Expressions.Expression;
+using IocAddToCacheExpression =
+    System.Linq.Expressions.Expression<System.Action<
+        Zt.Containers.Logic.DataStructures.ContainerStorage,
+        Zt.Containers.Logic.DataStructures.ServiceDescriptor, object>>;
 using IocExpression = System.Linq.Expressions.Expression<System.Func<object>>;
 using IocGetFromCacheExpression =
     System.Linq.Expressions.Expression<System.Func<
         Zt.Containers.Logic.DataStructures.ContainerStorage,
         Zt.Containers.Logic.DataStructures.ServiceDescriptor, object?>>;
-using IocAddToCacheExpression =
-    System.Linq.Expressions.Expression<System.Action<
-        Zt.Containers.Logic.DataStructures.ContainerStorage,
-        Zt.Containers.Logic.DataStructures.ServiceDescriptor, object>>;
 
 namespace Zt.Containers.Logic
 {
@@ -64,7 +64,8 @@ namespace Zt.Containers.Logic
 
             public Dictionary<ServiceDescriptor, Node>? Children { get; private set; }
             public Dictionary<(Type ParameterType, object Key), ServiceDescriptor>?
-                ChildServiceDescriptors { get; private set; }
+                ChildServiceDescriptors
+            { get; private set; }
             public UnaryExpression[]? 可选参数 { get; private set; }
             public (Type ParameterType, object Key)[]? 必选参数 { get; private set; }
             // ReSharper disable once MemberCanBePrivate.Local
@@ -72,10 +73,6 @@ namespace Zt.Containers.Logic
             public ContainerInstanceBuildInfo? BuildInfo { get; internal set; } =
                 BuildInfo;
         }
-
-        public ContainerInstanceBuilder ContainerInstanceBuilder { get; }
-        public ServiceDescriptor ServiceDescriptor { get; }
-        public ConstructorInfo ConstructorInfo { get; }
 
         public 有依赖项类型的BuildInfoBuilder(
             ContainerInstanceBuilder containerInstanceBuilder,
@@ -86,7 +83,9 @@ namespace Zt.Containers.Logic
             ServiceDescriptor = serviceDescriptor;
             ConstructorInfo = constructorInfo;
         }
-
+        public ConstructorInfo ConstructorInfo { get; }
+        public ContainerInstanceBuilder ContainerInstanceBuilder { get; }
+        public ServiceDescriptor ServiceDescriptor { get; }
         public ContainerInstanceBuildInfo Build()
         {
             var root = 构建依赖树();
@@ -94,19 +93,6 @@ namespace Zt.Containers.Logic
             使用依赖树构建BuildInfo(dictionary);
 
             return root.BuildInfo!;
-        }
-
-        private void 使用依赖树构建BuildInfo(Dictionary<int, List<Node>> dictionary)
-        {
-            var count = dictionary.Count;
-
-            for (int i = count - 1; i >= 0; i--)
-            {
-                foreach (var node in dictionary[i])
-                {
-                    构建节点BuildInfo(in node);
-                }
-            }
         }
 
         private void 构建节点BuildInfo(in Node node)
@@ -159,8 +145,8 @@ namespace Zt.Containers.Logic
 
             HashSetExtenisons.AddRange(parameterExpressions, 获取所有子节点的变量(node));
             var (@return, end) = node.Builder.CreateEndExpression(value);
-            var block = Block(parameterExpressions.Concat(new[] {value,}),
-                keyExpressions.Concat(new Expression[] {@return, end}));
+            var block = Block(parameterExpressions.Concat(new[] { value, }),
+                keyExpressions.Concat(new Expression[] { @return, end }));
             IocExpression expression = Lambda<Func<object>>(block);
             var compile = expression.Compile();
             node.BuildInfo =
@@ -176,121 +162,6 @@ namespace Zt.Containers.Logic
                 };
             node.Builder.Storage.AddBuildInfo(nodeServiceDescriptor, node.BuildInfo);
         }
-
-        private HashSet<ServiceDescriptor> 获取所有子节点的服务描述(in Node node)
-        {
-            var stack = new Stack<Node>();
-            stack.Push(node);
-            var list = new List<ServiceDescriptor>();
-
-            while (StackExtensions.TryPop(stack, out var value))
-            {
-                var value1 = value;
-                var array = value!.必选参数?.Select(tuple =>
-                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
-                    .ToArray();
-
-                if (array != null)
-                {
-                    stack.PushArray(array);
-                    list.AddRange(array.Select(node1 => node1.ServiceDescriptor));
-                }
-            }
-
-            return list.ToHashSet();
-        }
-
-        private ParameterExpression[] 获取所有子节点的变量(in Node node)
-        {
-            var stack = new Stack<Node>();
-            stack.Push(node);
-            var nodes = new List<Node>();
-
-            while (StackExtensions.TryPop(stack, out var value))
-            {
-                var value1 = value;
-                var array = value!.必选参数?.Select(tuple =>
-                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
-                    .ToArray();
-
-                if (array != null)
-                {
-                    stack.PushArray(array);
-                    nodes.AddRange(array);
-                }
-            }
-
-            var parameterExpressions = new List<ParameterExpression>();
-            parameterExpressions.AddRange(nodes.Select(node1 =>
-                node1.BuildInfo!.Variable));
-            parameterExpressions.AddRange(nodes.SelectMany(node1 =>
-                node1.BuildInfo!.InternalVariable ??
-                Enumerable.Empty<ParameterExpression>()));
-
-            return parameterExpressions.ToArray();
-        }
-
-        private Expression[] 获取节点的构造函数参数(in Node node)
-        {
-            var node1 = node;
-            // ReSharper disable once CoVariantArrayConversion
-            Expression[]? parameterExpressions = node.必选参数?.Select(tuple =>
-                    node1.Children![node1.ChildServiceDescriptors![tuple]].BuildInfo!
-                        .Variable)
-                .ToArray();
-            var expressions = node.可选参数!
-                .Concat(parameterExpressions ?? Enumerable.Empty<Expression>())
-                .ToArray();
-
-            return expressions;
-        }
-
-        private IEnumerable<Expression> 获取所有子节点的关键表达式步骤(in Node node)
-        {
-            var stack = new Stack<Node>();
-            stack.Push(node);
-            var nodes = new List<Node>();
-
-            while (StackExtensions.TryPop(stack, out var value))
-            {
-                var value1 = value;
-                var array = value!.必选参数?.Select(tuple =>
-                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
-                    .ToArray();
-
-                if (array != null)
-                {
-                    stack.PushArray(array);
-                    nodes.AddRange(array);
-                }
-            }
-
-            return nodes.SelectMany(node1 => node1.BuildInfo!.KeyExpressions);
-        }
-
-        private Dictionary<int, List<Node>> 将依赖树展开(Node root)
-        {
-            var dictionary = new Dictionary<int, List<Node>>();
-            var stack = new Stack<Node>();
-            stack.Push(root);
-
-            while (StackExtensions.TryPop(stack, out var node))
-            {
-                if (dictionary.TryGetValue(node!.Depth, out var list))
-                {
-                    list.Add(node);
-                }
-                else
-                {
-                    dictionary.Add(node.Depth, new List<Node> {node});
-                }
-
-                if (node.Children != null) stack.PushArray(node.Children.Values);
-            }
-
-            return dictionary;
-        }
-
         private Node 构建依赖树()
         {
             var node = new Node(default,
@@ -338,6 +209,127 @@ namespace Zt.Containers.Logic
             }
 
             return node;
+        }
+        private Expression[] 获取节点的构造函数参数(in Node node)
+        {
+            var node1 = node;
+            // ReSharper disable once CoVariantArrayConversion
+            Expression[]? parameterExpressions = node.必选参数?.Select(tuple =>
+                node1.Children![node1.ChildServiceDescriptors![tuple]].BuildInfo!
+                     .Variable)
+                .ToArray();
+            var expressions = node.可选参数!
+                .Concat(parameterExpressions ?? Enumerable.Empty<Expression>())
+                .ToArray();
+
+            return expressions;
+        }
+        private ParameterExpression[] 获取所有子节点的变量(in Node node)
+        {
+            var stack = new Stack<Node>();
+            stack.Push(node);
+            var nodes = new List<Node>();
+
+            while (StackExtensions.TryPop(stack, out var value))
+            {
+                var value1 = value;
+                var array = value!.必选参数?.Select(tuple =>
+                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
+                    .ToArray();
+
+                if (array != null)
+                {
+                    stack.PushArray(array);
+                    nodes.AddRange(array);
+                }
+            }
+
+            var parameterExpressions = new List<ParameterExpression>();
+            parameterExpressions.AddRange(nodes.Select(node1 =>
+                node1.BuildInfo!.Variable));
+            parameterExpressions.AddRange(nodes.SelectMany(node1 =>
+                node1.BuildInfo!.InternalVariable ??
+                Enumerable.Empty<ParameterExpression>()));
+
+            return parameterExpressions.ToArray();
+        }
+        private HashSet<ServiceDescriptor> 获取所有子节点的服务描述(in Node node)
+        {
+            var stack = new Stack<Node>();
+            stack.Push(node);
+            var list = new List<ServiceDescriptor>();
+
+            while (StackExtensions.TryPop(stack, out var value))
+            {
+                var value1 = value;
+                var array = value!.必选参数?.Select(tuple =>
+                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
+                    .ToArray();
+
+                if (array != null)
+                {
+                    stack.PushArray(array);
+                    list.AddRange(array.Select(node1 => node1.ServiceDescriptor));
+                }
+            }
+
+            return list.ToHashSet();
+        }
+        private IEnumerable<Expression> 获取所有子节点的关键表达式步骤(in Node node)
+        {
+            var stack = new Stack<Node>();
+            stack.Push(node);
+            var nodes = new List<Node>();
+
+            while (StackExtensions.TryPop(stack, out var value))
+            {
+                var value1 = value;
+                var array = value!.必选参数?.Select(tuple =>
+                        value1!.Children![value1.ChildServiceDescriptors![tuple]])
+                    .ToArray();
+
+                if (array != null)
+                {
+                    stack.PushArray(array);
+                    nodes.AddRange(array);
+                }
+            }
+
+            return nodes.SelectMany(node1 => node1.BuildInfo!.KeyExpressions);
+        }
+        private Dictionary<int, List<Node>> 将依赖树展开(Node root)
+        {
+            var dictionary = new Dictionary<int, List<Node>>();
+            var stack = new Stack<Node>();
+            stack.Push(root);
+
+            while (StackExtensions.TryPop(stack, out var node))
+            {
+                if (dictionary.TryGetValue(node!.Depth, out var list))
+                {
+                    list.Add(node);
+                }
+                else
+                {
+                    dictionary.Add(node.Depth, new List<Node> { node });
+                }
+
+                if (node.Children != null) stack.PushArray(node.Children.Values);
+            }
+
+            return dictionary;
+        }
+        private void 使用依赖树构建BuildInfo(Dictionary<int, List<Node>> dictionary)
+        {
+            var count = dictionary.Count;
+
+            for (int i = count - 1; i >= 0; i--)
+            {
+                foreach (var node in dictionary[i])
+                {
+                    构建节点BuildInfo(in node);
+                }
+            }
         }
     }
 }

@@ -39,6 +39,19 @@ namespace TestProject
         }
 
         [Fact]
+        public void Test_ImplementationFactory()
+        {
+            var descriptor = new ServiceDescriptor<IA, A>(_ => new A());
+            ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
+            Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
+            Assert.Equal(descriptor.ImplementationType,
+                serviceDescriptor.ImplementationType);
+            Assert.Equal(serviceDescriptor.ServiceKey, NullKey.Instance);
+            Assert.NotNull(serviceDescriptor.ImplementationFactory);
+            Assert.IsType<A>(
+                serviceDescriptor.ImplementationFactory!.Invoke(default!)!);
+        }
+        [Fact]
         public void Test_ImplementationInstance()
         {
             var descriptor = new ServiceDescriptor<IA, A>(new A());
@@ -53,21 +66,6 @@ namespace TestProject
                 descriptor.ImplementationInstance);
             Assert.Null(serviceDescriptor.ImplementationFactory);
         }
-
-        [Fact]
-        public void Test_ImplementationFactory()
-        {
-            var descriptor = new ServiceDescriptor<IA, A>(_ => new A());
-            ServiceDescriptor? serviceDescriptor = descriptor.ToServiceDescriptor();
-            Assert.Equal(descriptor.ServiceType, serviceDescriptor.ServiceType);
-            Assert.Equal(descriptor.ImplementationType,
-                serviceDescriptor.ImplementationType);
-            Assert.Equal(serviceDescriptor.ServiceKey, NullKey.Instance);
-            Assert.NotNull(serviceDescriptor.ImplementationFactory);
-            Assert.IsType<A>(
-                serviceDescriptor.ImplementationFactory!.Invoke(default!)!);
-        }
-
         [Fact]
         public void Test_ServiceDescriptor泛型()
         {

@@ -1,5 +1,4 @@
-﻿using System;
-using TestProject.测试数据;
+﻿using TestProject.测试数据;
 using Xunit;
 using Zt.Containers;
 using Zt.Containers.Logic.DataStructures;
@@ -69,61 +68,6 @@ namespace TestProject
         }
 
         [Fact]
-        public void 子容器的存储构建_有Transient注册时()
-        {
-            {
-                var container = new Container();
-                container.AddService<链式1>();
-                container.GetService<链式1>();
-                var subContainer = container.CreateSubContainer();
-                var storage = container.GetStorage();
-                var subStorage = subContainer.GetStorage();
-                Assert.NotEqual(storage.BuildInfos.Count, subStorage.BuildInfos.Count);
-                Assert.NotSame(storage.BuildInfos, subStorage.BuildInfos);
-                Assert.Same(storage.SingletonServiceDescriptors,
-                    subStorage.SingletonServiceDescriptors);
-                Assert.Equal(storage.SingletonServiceDescriptors.Count,
-                    subStorage.SingletonServiceDescriptors.Count);
-                Assert.NotSame(storage.ScopedServiceDescriptors,
-                    subStorage.ScopedServiceDescriptors);
-                Assert.Equal(storage.ScopedServiceDescriptors.Count,
-                    subStorage.ScopedServiceDescriptors.Count);
-                Assert.NotSame(storage.TransientServiceDescriptors,
-                    subStorage.TransientServiceDescriptors);
-                Assert.Equal(storage.TransientServiceDescriptors.Count,
-                    subStorage.TransientServiceDescriptors.Count);
-                Assert.Equal(storage.SingletonCache.Count,
-                    subStorage.SingletonCache.Count);
-                Assert.Equal(storage.ScopedCache.Count, subStorage.ScopedCache.Count);
-            }
-            {
-                var container = new Container();
-                var subContainer = container.CreateSubContainer();
-                container.AddService<链式1>();
-                container.GetService<链式1>();
-                var storage = container.GetStorage();
-                var subStorage = subContainer.GetStorage();
-                Assert.NotEqual(storage.BuildInfos.Count, subStorage.BuildInfos.Count);
-                Assert.NotSame(storage.BuildInfos, subStorage.BuildInfos);
-                Assert.Same(storage.SingletonServiceDescriptors,
-                    subStorage.SingletonServiceDescriptors);
-                Assert.Equal(storage.SingletonServiceDescriptors.Count,
-                    subStorage.SingletonServiceDescriptors.Count);
-                Assert.NotSame(storage.ScopedServiceDescriptors,
-                    subStorage.ScopedServiceDescriptors);
-                Assert.Equal(storage.ScopedServiceDescriptors.Count,
-                    subStorage.ScopedServiceDescriptors.Count);
-                Assert.NotSame(storage.TransientServiceDescriptors,
-                    subStorage.TransientServiceDescriptors);
-                Assert.NotEqual(storage.TransientServiceDescriptors.Count,
-                    subStorage.TransientServiceDescriptors.Count);
-                Assert.Equal(storage.SingletonCache.Count,
-                    subStorage.SingletonCache.Count);
-                Assert.Equal(storage.ScopedCache.Count, subStorage.ScopedCache.Count);
-            }
-        }
-
-        [Fact]
         public void 子容器的存储构建_有Scoped注册时()
         {
             {
@@ -179,7 +123,6 @@ namespace TestProject
                     subStorage.ScopedCache.Count);
             }
         }
-
         [Fact]
         public void 子容器的存储构建_有Singleton注册时()
         {
@@ -212,6 +155,60 @@ namespace TestProject
                 var container = new Container();
                 var subContainer = container.CreateSubContainer();
                 container.AddService<链式1>(ServiceLifetime.Singleton);
+                container.GetService<链式1>();
+                var storage = container.GetStorage();
+                var subStorage = subContainer.GetStorage();
+                Assert.NotEqual(storage.BuildInfos.Count, subStorage.BuildInfos.Count);
+                Assert.NotSame(storage.BuildInfos, subStorage.BuildInfos);
+                Assert.Same(storage.SingletonServiceDescriptors,
+                    subStorage.SingletonServiceDescriptors);
+                Assert.Equal(storage.SingletonServiceDescriptors.Count,
+                    subStorage.SingletonServiceDescriptors.Count);
+                Assert.NotSame(storage.ScopedServiceDescriptors,
+                    subStorage.ScopedServiceDescriptors);
+                Assert.Equal(storage.ScopedServiceDescriptors.Count,
+                    subStorage.ScopedServiceDescriptors.Count);
+                Assert.NotSame(storage.TransientServiceDescriptors,
+                    subStorage.TransientServiceDescriptors);
+                Assert.NotEqual(storage.TransientServiceDescriptors.Count,
+                    subStorage.TransientServiceDescriptors.Count);
+                Assert.Equal(storage.SingletonCache.Count,
+                    subStorage.SingletonCache.Count);
+                Assert.Equal(storage.ScopedCache.Count, subStorage.ScopedCache.Count);
+            }
+        }
+        [Fact]
+        public void 子容器的存储构建_有Transient注册时()
+        {
+            {
+                var container = new Container();
+                container.AddService<链式1>();
+                container.GetService<链式1>();
+                var subContainer = container.CreateSubContainer();
+                var storage = container.GetStorage();
+                var subStorage = subContainer.GetStorage();
+                Assert.NotEqual(storage.BuildInfos.Count, subStorage.BuildInfos.Count);
+                Assert.NotSame(storage.BuildInfos, subStorage.BuildInfos);
+                Assert.Same(storage.SingletonServiceDescriptors,
+                    subStorage.SingletonServiceDescriptors);
+                Assert.Equal(storage.SingletonServiceDescriptors.Count,
+                    subStorage.SingletonServiceDescriptors.Count);
+                Assert.NotSame(storage.ScopedServiceDescriptors,
+                    subStorage.ScopedServiceDescriptors);
+                Assert.Equal(storage.ScopedServiceDescriptors.Count,
+                    subStorage.ScopedServiceDescriptors.Count);
+                Assert.NotSame(storage.TransientServiceDescriptors,
+                    subStorage.TransientServiceDescriptors);
+                Assert.Equal(storage.TransientServiceDescriptors.Count,
+                    subStorage.TransientServiceDescriptors.Count);
+                Assert.Equal(storage.SingletonCache.Count,
+                    subStorage.SingletonCache.Count);
+                Assert.Equal(storage.ScopedCache.Count, subStorage.ScopedCache.Count);
+            }
+            {
+                var container = new Container();
+                var subContainer = container.CreateSubContainer();
+                container.AddService<链式1>();
                 container.GetService<链式1>();
                 var storage = container.GetStorage();
                 var subStorage = subContainer.GetStorage();

@@ -8,7 +8,7 @@ namespace TestProject.≤‚ ‘ ˝æ›
     {
         public static ContainerStorage GetStorage(this Container container)
         {
-            return (ContainerStorage) container.GetType()
+            return (ContainerStorage)container.GetType()
                 .GetProperty("Storage", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .GetValue(container);
         }

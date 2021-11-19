@@ -2,9 +2,7 @@
 
 namespace Zt.Containers.Attributes
 {
-    [AttributeUsage(AttributeTargets.Constructor,
-        Inherited = false,
-        AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Constructor)]
     public sealed class SelectedConstructorAttribute : Attribute
     {
     }
